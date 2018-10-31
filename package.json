@@ -1,0 +1,11 @@
+{
+  "name": "bucatino-con-giardino",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "none",
+  "private": true,
+  "dependencies": {
+    "prettier": "^1.14.3",
+    "puppeteer": "^1.9.0"
+  }
+}
