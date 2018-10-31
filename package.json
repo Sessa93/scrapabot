@@ -5,7 +5,10 @@
   "license": "none",
   "private": true,
   "dependencies": {
-    "prettier": "^1.14.3",
+    "node-fetch": "^2.2.0",
     "puppeteer": "^1.9.0"
+  },
+  "devDependencies": {
+    "prettier": "^1.14.3"
   }
 }
