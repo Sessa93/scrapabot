@@ -6,6 +6,10 @@ const path = require('path')
 const puppeteer = require('puppeteer')
 const url = require('url')
 
+const APP_TOKEN = process.env.APP_TOKEN;
+const CHANNEL_ID = process.env.CHANNEL_ID;
+const SLACK_URL = process.env.SLACK_URL;
+
 const run = async () => {
   const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
   const page = await browser.newPage()
@@ -62,6 +66,9 @@ const run = async () => {
       )
     ) {
       console.log(content)
+      //console.log({ "token": APP_TOKEN, "channel": CHANNEL_ID, 'username': 'bucabot', 'text': content })
+      let result = await fetch(SLACK_URL, { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ "token": APP_TOKEN, "channel": CHANNEL_ID, 'username': 'bucabot', 'text': content }) })
+      console.log(result)
       break
     }
   }
