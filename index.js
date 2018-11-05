@@ -5,6 +5,7 @@ const { tmpdir } = require('os')
 const path = require('path')
 const puppeteer = require('puppeteer')
 const url = require('url')
+const request = require('request')
 
 const APP_TOKEN = process.env.APP_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
@@ -60,15 +61,37 @@ const run = async () => {
 
     fs.unlinkSync(outfile)
 
-    if (
-      ['bucatino', 'giardino', 'menu', 'primi', 'secondi', 'pizza', 'seguici'].some(keyword =>
-        content.toLowerCase().includes(keyword),
-      )
-    ) {
-      console.log(content)
-      //console.log({ "token": APP_TOKEN, "channel": CHANNEL_ID, 'username': 'bucabot', 'text': content })
-      let result = await fetch(SLACK_URL, { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ "token": APP_TOKEN, "channel": CHANNEL_ID, 'username': 'bucabot', 'text': content }) })
-      console.log(result)
+    if (['bucatino', 'giardino', 'menu', 'primi', 'secondi', 'pizza', 'seguici'].some(keyword =>
+        content.toLowerCase().includes(keyword))
+        ) {
+          const lines = content.split('\n')
+          let begin, end
+          for (let i = 0; i < lines.lenght; i++)  {
+            if (['Primi', 'abbondante', '8,00', '1,00'].some(keyword => line.includes(keyword))) {
+              begin = i
+            }
+            if (['Secondi', 'giorno', 'contorno'].some(keyword => line.includes(keyword))) {
+              end = i
+            }
+          }
+          const firstCourses = lines.slice(begin + 1, end).join('\n')
+          console.log(firstCourses)
+          console.log(lines.slice(begin + 1, end))
+        
+      request({
+        url: SLACK_URL,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        form: { 'token': APP_TOKEN, 'channel': CHANNEL_ID, 'username': 'bucabot', 'text': firstCourses }
+      }, 
+      function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body)
+        }
+      })
+
       break
     }
   }

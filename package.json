@@ -6,7 +6,8 @@
   "private": true,
   "dependencies": {
     "node-fetch": "^2.2.0",
-    "puppeteer": "^1.9.0"
+    "puppeteer": "^1.9.0",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "prettier": "^1.14.3"
