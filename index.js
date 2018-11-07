@@ -45,7 +45,7 @@ const run = async () => {
   )
 
   const images = await Promise.all(
-    urls.slice(0, 5).map(async url => {
+    urls.slice(0, 1).map(async url => {
       const urlPage = await browser.newPage()
       urlPage.setCookie(...cookies)
 
