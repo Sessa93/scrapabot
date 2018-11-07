@@ -10,10 +10,33 @@ const request = require('request')
 const APP_TOKEN = process.env.APP_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 const SLACK_URL = process.env.SLACK_URL;
+const FB_USERNAME = process.env.FB_USERNAME;
+const FB_PASSWORD = process.env.FB_PASSWORD;
 
 const run = async () => {
   const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
   const page = await browser.newPage()
+
+  await page.goto('https://www.facebook.com/login')
+  
+  const emailField = await page.$('input[name=email]')
+  await emailField.click()
+  await emailField.type(FB_USERNAME)
+  await emailField.dispose()
+  
+  const passwordField = await page.$('input[name=pass]')
+  await passwordField.click()
+  await passwordField.type(FB_PASSWORD)
+  await passwordField.dispose()
+  
+  const loginButton = await page.$('button[name=login]')
+  await loginButton.focus()
+  await loginButton.click()
+  await loginButton.dispose()
+  await page.waitForNavigation();
+  
+  const cookies = await page.cookies();
+  
   await page.goto('https://www.facebook.com/pg/ilbucatinocongiardino/photos/?ref=page_internal')
   await page.waitFor('[role="presentation"] a[rel="theater"]')
 
@@ -24,12 +47,13 @@ const run = async () => {
   const images = await Promise.all(
     urls.slice(0, 5).map(async url => {
       const urlPage = await browser.newPage()
+      urlPage.setCookie(...cookies)
+
       await urlPage.goto(url, { timeout: 300000 })
       await urlPage.waitFor('a[rel="theater"] img')
       await urlPage.click('a[rel="theater"] img')
-      await urlPage.waitFor('img.spotlight')
+      await urlPage.waitFor('img.spotlight', { timeout: 3000000 })
       const src = await urlPage.$eval('img.spotlight', img => img.getAttribute('src'))
-
       await urlPage.close()
 
       return src
@@ -69,7 +93,6 @@ const run = async () => {
           begin = i
         }
         if (['Secondi', 'contorno'].some(keyword => lines[i].includes(keyword))) {
-          console.log('End: '+lines[i])
           end = i
         }
       }
