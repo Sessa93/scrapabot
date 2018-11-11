@@ -62,6 +62,8 @@ RUN apt install -y \
 
 RUN yarn install --frozen-lockfile --production
 
-COPY index.js index.js
+COPY . .
 
-CMD [ "node", "index.js" ]
+RUN yarn build
+
+CMD [ "node", "dist/index.js" ]
