@@ -4,7 +4,5 @@ services:
   bcg:
     image: bcg
     build: .
-    environment:
-      - SLACK_URL=https://slack.com/api/chat.postMessage
-      - CHANNEL_ID=cibo
-      - APP_TOKEN=token
+    ports:
+      - 8000:8000

@@ -60,10 +60,11 @@ RUN apt install -y \
   tesseract-ocr \
   tesseract-ocr-ita
 
-RUN yarn install --frozen-lockfile --production
+RUN yarn install --frozen-lockfile
 
 COPY . .
 
 RUN yarn build
 
-CMD [ "node", "dist/index.js" ]
+EXPOSE 8000
+CMD [ "yarn", "dev" ]

@@ -12,10 +12,12 @@ export default function (app) {
 
   // 404
   app.use((req, res) => {
-    res.status(404).send({
+    let resp = {
       status: 404,
       message: 'The requested resource was not found',
-    })
+    }
+    console.log(resp)
+    res.status(404).send(resp)
   })
 
   // 5xx
