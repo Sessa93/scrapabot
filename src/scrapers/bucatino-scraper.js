@@ -112,19 +112,19 @@ export default class BucatinoScraper {
           const firstCourses = lines.slice(begin, end).join('\n')
           console.log(firstCourses)
 
-          // request({
-          //   url: SLACK_URL,
-          //   method: 'POST',
-          //   headers: {
-          //     'Content-Type': 'application/json'
-          //   },
-          //   form: { 'token': APP_TOKEN, 'channel': CHANNEL_ID, 'username': 'bucabot', 'text': firstCourses }
-          // },
-          // function (error, response, body) {
-          //   if (!error && response.statusCode == 200) {
-          //       console.log(body)
-          //   }
-          // })
+          request({
+            url: SLACK_URL,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            form: { 'token': APP_TOKEN, 'channel': CHANNEL_ID, 'username': 'bucabot', 'text': firstCourses }
+          },
+          function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(body)
+            }
+          })
           break
         }
       }

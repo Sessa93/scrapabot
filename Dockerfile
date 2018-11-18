@@ -67,4 +67,4 @@ COPY . .
 RUN yarn build
 
 EXPOSE 8000
-CMD [ "yarn", "dev" ]
+CMD [ "yarn", "prod" ]
