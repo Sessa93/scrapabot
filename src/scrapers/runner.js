@@ -35,7 +35,7 @@ export const setSchedule = (scraper, cronExpr) => {
                 jobs[s.name].schedule.reschedule(cronExpr, s.run)
             else {
                 const job = schedule.scheduleJob(cronExpr, s.run)
-                schedules[s.name] = { schedule: job, failures: 0, running: false }
+                jobs[s.name] = { schedule: job, failures: 0, running: false }
             }
         }
     })
