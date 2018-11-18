@@ -8,6 +8,7 @@ import path from 'path'
 import puppeteer from 'puppeteer'
 import url from 'url'
 import config from 'config'
+import request from 'request'
 
 const APP_TOKEN = config.get('slack.bucabot.appToken')
 const CHANNEL_ID = config.get('slack.bucabot.channel')
@@ -110,7 +111,6 @@ export default class BucatinoScraper {
             }
           }
           const firstCourses = lines.slice(begin, end).join('\n')
-          console.log(firstCourses)
 
           request({
             url: SLACK_URL,
