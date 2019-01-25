@@ -1,6 +1,7 @@
 'use strict'
 
 import BucatinoScraper from './bucatino-scraper'
+import RibaltaScraper from './ribalta-scraper'
 import schedule from 'node-schedule'
 
 let jobs = {}
@@ -22,15 +23,17 @@ const handler = {
     }
 }
 
-const scrapers = [new BucatinoScraper(handler)]
+const scrapers = [new RibaltaScraper(handler)]
 
 export const getScrapers = () => {
     return scrapers
 }
 
 export const setSchedule = (scraper, cronExpr) => {
+    let found = false
     scrapers.forEach((s) => {
         if (s.name === scraper) {
+            found = true
             if (jobs[s.name] && jobs[s.name].schedule) 
                 jobs[s.name].schedule.reschedule(cronExpr, s.run)
             else {
@@ -39,11 +42,14 @@ export const setSchedule = (scraper, cronExpr) => {
             }
         }
     })
+    return found
 }
 
 export const run = (scraper) => {
+    let found = false
     scrapers.forEach((s) => {
         if (s.name === scraper) {
+            found = true
             if (!jobs[s.name]) {
                 jobs[s.name] = { schedule: undefined,  failures: 0, running: true }
                 s.run()
@@ -55,6 +61,7 @@ export const run = (scraper) => {
             }
         }
     })
+    return found
 }
 
 export const runAll = () => {

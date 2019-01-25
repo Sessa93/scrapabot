@@ -7,12 +7,18 @@ const router = new express.Router()
 
 router.post('/slack/command/menu', async (req, res) => {
   try {
-    run('bucatino')
     const slackReqObj = req.body
+    let found = run(slackReqObj.name)
+
+    let resText = 'Working on it...'
+    if (!found) {
+      resText = 'No scraper found with name '+ slackReqObj.name
+    }
+
     const response = {
       response_type: 'in_channel',
       channel: slackReqObj.channel_id,
-      text: 'Working on it...'
+      text: resText
     }
     return res.json(response)
   } catch (err) {
@@ -24,12 +30,17 @@ router.post('/slack/command/menu', async (req, res) => {
 router.post('/slack/command/schedule', async (req, res) => {
   try {
     const slackReqObj = req.body
-    setSchedule('bucatino', slackReqObj.cron)
+    let found = setSchedule(slackReqObj.name, slackReqObj.cron)
+
+    let resText = 'New schedule set! '+slackReqObj.cron
+    if (!found) {
+      resText = 'No scraper found with name '+ slackReqObj.name
+    }
 
     const response = {
       response_type: 'in_channel',
       channel: slackReqObj.channel_id,
-      text: 'New schedule set! '+slackReqObj.cron
+      text: resText
     }
     return res.json(response)
   } catch (err) {
