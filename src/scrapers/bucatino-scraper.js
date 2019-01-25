@@ -137,7 +137,7 @@ export default class BucatinoScraper {
               amatriciana = true
             }
           }
-          const firstCourses = lines.slice(begin, end).join('\n')
+          let firstCourses = lines.slice(begin, end).join('\n')
 
           if (amatriciana) {
             firstCourses += '\n@gnardiello !AMATRICIANA!'
