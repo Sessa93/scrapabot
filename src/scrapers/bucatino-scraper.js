@@ -26,7 +26,23 @@ export default class BucatinoScraper {
     return this._name
   }
 
-  async run() {
+  makeRequest(text) {
+    request({
+      url: SLACK_URL,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      form: { 'token': APP_TOKEN, 'channel': CHANNEL_ID, 'username': 'bucabot', text }
+    },
+    function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+          console.log(body)
+      }
+    })
+  }
+
+  async run(mode) {
     console.log(this._name + ' is scraping...')
     try {
       const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
@@ -68,30 +84,40 @@ export default class BucatinoScraper {
           await urlPage.click('a[rel="theater"] img')
           await urlPage.waitFor('img.spotlight', { timeout: 300000 })
           const src = await urlPage.$eval('img.spotlight', img => img.getAttribute('src'))
+
+          await urlPage.waitFor('abbr.timestamp.livetimestamp', { timeout: 30000 })
+          const date = new Date((await urlPage.$eval('abbr.timestamp.livetimestamp', abbr => abbr.getAttribute('data-utime')))*1000)
+          
           await urlPage.close()
 
-          return src
+          return { src, date } 
         }),
       )
 
       await browser.close()
 
       const paths = await Promise.all(
-        images.map(async image => {
+        images.map(async (image, date) => {
           const res = await fetch(image)
           const filename = path.basename(url.parse(image).pathname)
           const filepath = path.join(tmpdir(), filename)
 
           fs.writeFileSync(filepath, await res.buffer())
 
-          return filepath
+          return { filepath, date }
         }),
       )
 
-      for (const image of paths) {
+      for (const { image, date } of paths) {
         const parsed = path.parse(image)
         const out = path.join(parsed.dir, parsed.name)
         const outfile = `${out}.txt`
+
+        const diff = (new Date()) - date
+        if (mode === 'SCHEDULED' && Math.floor((diff % 86400000) / 3600000) > 6) {
+          makeRequest("Sorry! Last Bucatino's menu was published " + date.toISOString() + ". You can try again later with /menu")
+          break
+        }
 
         execSync(`tesseract -l ita ${image} ${out}`, { stdio: 'ignore' })
 
@@ -99,6 +125,7 @@ export default class BucatinoScraper {
 
         fs.unlinkSync(outfile)
 
+        let amatriciana = false
         if (['bucatino', 'giardino', 'menu', 'primi', 'secondi', 'pizza', 'seguici'].some(keyword => content.toLowerCase().includes(keyword))) {
           const lines = content.split('\n')
           let begin, end
@@ -109,22 +136,17 @@ export default class BucatinoScraper {
             if (['Secondi', 'contorno'].some(keyword => lines[i].includes(keyword))) {
               end = i
             }
+            if(lines[i].includes('amatriciana')) {
+              amatriciana = true
+            }
           }
           const firstCourses = lines.slice(begin, end).join('\n')
 
-          request({
-            url: SLACK_URL,
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            form: { 'token': APP_TOKEN, 'channel': CHANNEL_ID, 'username': 'bucabot', 'text': firstCourses }
-          },
-          function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                console.log(body)
-            }
-          })
+          if (amatriciana) {
+            firstCourses += '\n@gnardiello !AMATRICIANA!'
+          }
+
+          makeRequest(firstCourses)
           break
         }
       }

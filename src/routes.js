@@ -8,7 +8,7 @@ const router = new express.Router()
 router.post('/slack/command/menu', async (req, res) => {
   try {
     const slackReqObj = req.body
-    let found = run(slackReqObj.name)
+    let found = run('bucatino', 'MANUAL')
 
     let resText = 'Working on it...'
     if (!found) {
@@ -30,7 +30,7 @@ router.post('/slack/command/menu', async (req, res) => {
 router.post('/slack/command/schedule', async (req, res) => {
   try {
     const slackReqObj = req.body
-    let found = setSchedule(slackReqObj.name, slackReqObj.cron)
+    let found = setSchedule('bucatino', slackReqObj.cron)
 
     let resText = 'New schedule set! '+slackReqObj.cron
     if (!found) {
