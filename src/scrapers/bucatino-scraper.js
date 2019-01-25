@@ -45,7 +45,7 @@ export default class BucatinoScraper {
   async run(mode) {
     console.log(this._name + ' is scraping...')
     try {
-      const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
+      const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true })
       const page = await browser.newPage()
       await page.goto('https://www.facebook.com/login')
       
@@ -84,8 +84,6 @@ export default class BucatinoScraper {
           await urlPage.click('a[rel="theater"] img')
           await urlPage.waitFor('img.spotlight', { timeout: 300000 })
           const src = await urlPage.$eval('img.spotlight', img => img.getAttribute('src'))
-
-          await urlPage.waitFor('abbr.timestamp.livetimestamp', { timeout: 30000 })
           const date = new Date((await urlPage.$eval('abbr.timestamp.livetimestamp', abbr => abbr.getAttribute('data-utime')))*1000)
           
           await urlPage.close()
@@ -97,32 +95,31 @@ export default class BucatinoScraper {
       await browser.close()
 
       const paths = await Promise.all(
-        images.map(async (image, date) => {
-          const res = await fetch(image)
-          const filename = path.basename(url.parse(image).pathname)
+        images.map(async (obj) => {
+          const res = await fetch(obj.src)
+          const filename = path.basename(url.parse(obj.src).pathname)
           const filepath = path.join(tmpdir(), filename)
 
           fs.writeFileSync(filepath, await res.buffer())
-
-          return { filepath, date }
+          const date = obj.date
+          return { image: filepath, date }
         }),
       )
 
-      for (const { image, date } of paths) {
-        const parsed = path.parse(image)
+      for (const obj of paths) {
+        const parsed = path.parse(obj.image)
         const out = path.join(parsed.dir, parsed.name)
         const outfile = `${out}.txt`
 
-        const diff = (new Date()) - date
+        const diff = (new Date()) - obj.date
         if (mode === 'SCHEDULED' && Math.floor((diff % 86400000) / 3600000) > 6) {
           makeRequest("Sorry! Last Bucatino's menu was published " + date.toISOString() + ". You can try again later with /menu")
           break
         }
 
-        execSync(`tesseract -l ita ${image} ${out}`, { stdio: 'ignore' })
+        execSync(`tesseract -l ita ${obj.image} ${out}`, { stdio: 'ignore' })
 
         const content = fs.readFileSync(outfile).toString()
-
         fs.unlinkSync(outfile)
 
         let amatriciana = false
@@ -150,7 +147,7 @@ export default class BucatinoScraper {
           break
         }
       }
-      paths.forEach(image => fs.unlinkSync(image))
+      paths.forEach(imgObj => fs.unlinkSync(imgObj.image))
       this._runner.success(this)
     } catch(exception) {
       console.log(exception)
