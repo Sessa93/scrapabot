@@ -23,7 +23,7 @@ const handler = {
     }
 }
 
-const scrapers = [new RibaltaScraper(handler)]
+const scrapers = [new BucatinoScraper(handler)]
 
 
 export const getScrapers = () => {
