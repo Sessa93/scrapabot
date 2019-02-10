@@ -115,12 +115,14 @@ export default class BucatinoScraper {
         const outfile = `${out}.txt`
 
         const diff = (new Date()) - obj.date
+        console.log('DIFF '+diff)
         if (mode === 'SCHEDULED' && Math.floor((diff % 86400000) / 3600000) > 6) {
           makeRequest("Sorry! Last Bucatino's menu was published " + date.toISOString() + ". You can try again later with /menu")
           break
         }
 
         execSync(`tesseract -l ita ${obj.image} ${out}`, { stdio: 'ignore' })
+        console.log('OCR: DONE!')
 
         const content = fs.readFileSync(outfile).toString()
         fs.unlinkSync(outfile)
