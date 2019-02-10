@@ -1,4 +1,4 @@
 /node_modules/
-config/development.json
+config/production.json
 dist
 yarn-error.log

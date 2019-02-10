@@ -84,7 +84,7 @@ export default class BucatinoScraper {
           await urlPage.click('a[rel="theater"] img')
           await urlPage.waitFor('img.spotlight', { timeout: 300000 })
           const src = await urlPage.$eval('img.spotlight', img => img.getAttribute('src'))
-          const date = new Date((await urlPage.$eval('abbr.timestamp.livetimestamp', abbr => abbr.getAttribute('data-utime')))*1000)
+          const date = new Date((await urlPage.$eval('#fbPhotoSnowliftTimestamp > a > abbr', abbr => abbr.getAttribute('data-utime')))*1000)
           
           await urlPage.close()
 
