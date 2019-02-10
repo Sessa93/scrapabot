@@ -2,7 +2,8 @@ version: '3.7'
 
 services:
   bcg:
-    image: bcg
-    build: .
+    image: tr4nsf3r/scrapabot
     ports:
       - 8000:8000
+    volumes:
+      - config.json:./config/production.json
