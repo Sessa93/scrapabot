@@ -116,8 +116,20 @@ export default class BucatinoScraper {
 
         const diff = (new Date()) - obj.date
         console.log('DIFF '+diff)
-        if (mode === 'SCHEDULED' && Math.floor((diff % 86400000) / 3600000) > 6) {
-          makeRequest("Sorry! Last Bucatino's menu was published " + date.toISOString() + ". You can try again later with /menu")
+        if (mode === 'SCHEDULED' && Math.floor((diff % 86400000) / 3600000) > 3) {
+          request({
+            url: SLACK_URL,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            form: { 'token': APP_TOKEN, 'channel': CHANNEL_ID, 'username': 'bucabot', text: "Sorry! Last Bucatino's menu was published " + date.toISOString() + ". You can try again later with /menu" }
+          },
+          function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(body)
+            }
+          })
           break
         }
 
@@ -148,7 +160,19 @@ export default class BucatinoScraper {
             firstCourses += '\n@gnardiello !AMATRICIANA!'
           }
 
-          makeRequest(firstCourses)
+          request({
+            url: SLACK_URL,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            form: { 'token': APP_TOKEN, 'channel': CHANNEL_ID, 'username': 'bucabot', text: firstCourses }
+          },
+          function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(body)
+            }
+          })
           break
         }
       }
